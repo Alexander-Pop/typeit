@@ -1,3 +1,5 @@
+import createElement from "./helpers/createElement";
+
 export function isVisible(element) {
   let coordinates = element.getBoundingClientRect();
 
@@ -24,7 +26,7 @@ export function randomInRange(value, range) {
 }
 
 export function appendStyleBlock(styles, id = "") {
-  let styleBlock = document.createElement("style");
+  let styleBlock = createElement("style");
   styleBlock.id = id;
   styleBlock.appendChild(document.createTextNode(styles));
   document.head.appendChild(styleBlock);
