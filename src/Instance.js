@@ -104,6 +104,10 @@ export default function Instance({
    * @param {array|null} initialStep
    */
   const generateQueue = (initialStep = null) => {
+
+
+
+
     if (initialStep) {
       this.queue.add(initialStep);
     }
@@ -111,6 +115,7 @@ export default function Instance({
     this.opts.strings.forEach((string, index) => {
       let itemizedString = maybeChunkStringAsHtml(string, this.opts.html);
 
+      // console.log(queueMany(itemizedString, this.type));
       this.queue.add(queueMany(itemizedString, this.type));
 
       let queueLength = this.queue.waiting.length;
@@ -127,6 +132,7 @@ export default function Instance({
       this.queue.add(queueMany(itemizedString, this.delete));
       addSplitPause(queueLength, string.length);
     });
+
   };
 
   /**
@@ -424,5 +430,9 @@ export default function Instance({
   // in which case we'd have a pre-defined queue.
   if (this.opts.strings.length && !isAReset) {
     generateQueue();
+
+    console.log('===');
+    console.log(this.queue.waiting.length);
+    console.log(this.queue.executed.length);
   }
 }
