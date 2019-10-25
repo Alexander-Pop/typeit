@@ -286,7 +286,6 @@ export default function Instance({
 
     promiseChain
       .then(() => {
-        ``;
         if (this.opts.loop) {
           //-- Split the delay!
           let delay = this.opts.loopDelay
@@ -405,6 +404,9 @@ export default function Instance({
   this.opts.html = elementIsInput ? false : this.opts.html;
   this.opts.nextStringDelay = calculateDelay(this.opts.nextStringDelay);
   this.opts.loopDelay = calculateDelay(this.opts.loopDelay);
+
+  // console.log('queue', queue);
+
   this.queue = new Queue(queue, [this.pause, this.opts.startDelay], this.opts);
 
   this.$e.setAttribute("data-typeit-id", id);

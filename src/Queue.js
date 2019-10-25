@@ -44,6 +44,19 @@ export default function(predefinedItems = [], initialItem = false) {
    * @return {object}
    */
   this.reset = () => {
+
+    console.log('===');
+    console.log('waiting:');
+    console.log(this.waiting.length);
+    // this.waiting.forEach(i => console.log(i));
+
+    console.log('executed:');
+    console.log(this.executed.length);
+    // this.executed.forEach(i => console.log(i));
+    console.log('===');
+
+    //
+
     this.waiting = this.executed.concat(this.waiting);
     this.executed = [];
     return this;
