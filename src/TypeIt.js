@@ -164,7 +164,7 @@ export default function TypeIt(element, options) {
    * @param {boolean} removeCursor
    */
   this.destroy = (removeCursor = true) => {
-    each(instance => {
+    this.instances = this.instances.map(instance => {
       // Destroy each timeout, for good housekeeping.
       instance.timeouts.forEach(timeout => {
         clearTimeout(timeout);
@@ -184,6 +184,8 @@ export default function TypeIt(element, options) {
       }
 
       instance.status.destroyed = true;
+
+      return instance;
     });
   };
 

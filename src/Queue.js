@@ -1,4 +1,4 @@
-export default function(predefinedItems = [], initialItem = false) {
+export default function(predefinedItems = [], initialItem = null) {
   /**
    * Insert items into the `waiting` queue.
    *
@@ -45,19 +45,12 @@ export default function(predefinedItems = [], initialItem = false) {
    */
   this.reset = () => {
 
-    console.log('===');
-    console.log('waiting:');
+    console.log('-===');
     console.log(this.waiting.length);
-    // this.waiting.forEach(i => console.log(i));
-
-    console.log('executed:');
     console.log(this.executed.length);
-    // this.executed.forEach(i => console.log(i));
-    console.log('===');
 
-    //
-
-    this.waiting = this.executed.concat(this.waiting);
+    this.waiting = [...this.waiting, ...this.executed];
+    // this.waiting = this.executed.concat(this.waiting);
     this.executed = [];
     return this;
   };

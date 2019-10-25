@@ -103,20 +103,11 @@ export default function Instance({
    *
    * @param {array|null} initialStep
    */
-  const generateQueue = (initialStep = null) => {
-
-
-
-
-    if (initialStep) {
-      this.queue.add(initialStep);
-    }
-
+  const generateQueue = () => {
     this.opts.strings.forEach((string, index) => {
       let itemizedString = maybeChunkStringAsHtml(string, this.opts.html);
 
-      // console.log(queueMany(itemizedString, this.type));
-      this.queue.add(queueMany(itemizedString, this.type));
+      this.queue.add(queueMany(itemizedString, this.type, true));
 
       let queueLength = this.queue.waiting.length;
 
@@ -206,6 +197,10 @@ export default function Instance({
   this.reset = () => {
     this.queue.reset();
 
+    // console.log('===');
+    // console.log(this.queue.executed.length);
+    // console.log(this.queue.waiting.length);
+
     return new Instance({
       element: this.$e,
       id: id,
@@ -219,6 +214,7 @@ export default function Instance({
    * Kick off the typing animation.
    */
   this.init = () => {
+
     if (this.status.started) return;
 
     setUpCursor();
@@ -265,9 +261,11 @@ export default function Instance({
 
           this.opts.beforeStep(...callbackArgs);
 
-          //-- Fire this step!
+          // Fire this step! During this process, pluck items from the waiting
+          // queue and move them to executed.
           key[0].call(this, key[1], key[2]).then(() => {
             let justExecuted = this.queue.waiting.shift();
+            // let justExecuted = this.queue.waiting[0];
 
             //-- If this is a phantom item, as soon as it's executed,
             //-- remove it from the queue and pretend it never existed.
@@ -411,9 +409,15 @@ export default function Instance({
   this.opts.nextStringDelay = calculateDelay(this.opts.nextStringDelay);
   this.opts.loopDelay = calculateDelay(this.opts.loopDelay);
 
-  // console.log('queue', queue);
+  // console.log('===');
+  // console.log(queue.length);
+  // Should be '4' every time!
+  //
+  // PROBLEM: The full set of previous queue items are NOT getting passed in!
+  // It doesn't seem to be an issue with the handoff. There's never any items in the executed queue. Which is good.
+  // It's almost like items are getting removed from the waiting queue, but not added to the executed.
 
-  this.queue = new Queue(queue, [this.pause, this.opts.startDelay], this.opts);
+  this.queue = new Queue(queue, [this.pause, this.opts.startDelay]);
 
   this.$e.setAttribute("data-typeit-id", id);
 
@@ -431,8 +435,5 @@ export default function Instance({
   if (this.opts.strings.length && !isAReset) {
     generateQueue();
 
-    console.log('===');
-    console.log(this.queue.waiting.length);
-    console.log(this.queue.executed.length);
   }
 }
