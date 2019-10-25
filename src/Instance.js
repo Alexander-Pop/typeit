@@ -48,12 +48,12 @@ export default function Instance({
    * @return {void}
    */
   const addSplitPause = (startPosition, numberOfActionsToWrap = 1) => {
-    let delay = this.opts.nextStringDelay;
-    this.queue.insert(startPosition, [this.pause, delay.before]);
-    this.queue.insert(startPosition + numberOfActionsToWrap + 1, [
-      this.pause,
-      delay.after
-    ]);
+    // let delay = this.opts.nextStringDelay;
+    // this.queue.insert(startPosition, [this.pause, delay.before]);
+    // this.queue.insert(startPosition + numberOfActionsToWrap + 1, [
+    //   this.pause,
+    //   delay.after
+    // ]);
   };
 
   /**
@@ -197,10 +197,6 @@ export default function Instance({
   this.reset = () => {
     this.queue.reset();
 
-    // console.log('===');
-    // console.log(this.queue.executed.length);
-    // console.log(this.queue.waiting.length);
-
     return new Instance({
       element: this.$e,
       id: id,
@@ -265,7 +261,6 @@ export default function Instance({
           // queue and move them to executed.
           key[0].call(this, key[1], key[2]).then(() => {
             let justExecuted = this.queue.waiting.shift();
-            // let justExecuted = this.queue.waiting[0];
 
             //-- If this is a phantom item, as soon as it's executed,
             //-- remove it from the queue and pretend it never existed.
@@ -416,6 +411,7 @@ export default function Instance({
   // PROBLEM: The full set of previous queue items are NOT getting passed in!
   // It doesn't seem to be an issue with the handoff. There's never any items in the executed queue. Which is good.
   // It's almost like items are getting removed from the waiting queue, but not added to the executed.
+  // They were removed from the waiting queue, but never added to executed.
 
   this.queue = new Queue(queue, [this.pause, this.opts.startDelay]);
 
@@ -434,6 +430,5 @@ export default function Instance({
   // in which case we'd have a pre-defined queue.
   if (this.opts.strings.length && !isAReset) {
     generateQueue();
-
   }
 }

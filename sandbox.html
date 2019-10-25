@@ -1,7 +1,7 @@
 <html>
 	<head>
     <meta charset="utf-8"/>
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,200italic,400,600,600italic,700">
+    <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,200italic,400,600,600italic,700"> -->
 
     <style>
       * {
@@ -34,14 +34,15 @@
       <h3 id="example1"></h3>
     </section>
 
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=Promise%2CObject.assign%2CArray.prototype.fill"></script>
+    <!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=Promise%2CObject.assign%2CArray.prototype.fill"></script> -->
     <script src="dist/typeit.min.js"></script>
 
 		<script>
       window.instance = new TypeIt('#example1', {
         strings: "123",
         speed: 500,
-        waitUntilVisible: true
+        waitUntilVisible: true,
+        cursor: false
       }).go();
 		</script>
 	</body>
