@@ -1,3 +1,5 @@
+
+
 export default function(predefinedItems = [], initialItem = null) {
 
   /**
@@ -9,6 +11,10 @@ export default function(predefinedItems = [], initialItem = null) {
   this.insert = (start, newItems) => {
     this.waiting.splice(start, 0, newItems);
   };
+
+  this.getWaiting = () => {
+    return this.waiting;
+  }
 
   this.getLength = () => {
     return this.waiting.length;
@@ -62,12 +68,15 @@ export default function(predefinedItems = [], initialItem = null) {
    */
   this.reset = () => {
 
-    console.log('-===');
-    console.log(this.waiting.length);
-    console.log(this.executed.length);
+    // console.log('===');
+    // console.log('waiting');
+    // console.log(this.waiting.forEach(i => console.log(i)));
+    // console.log('executed');
+    // console.log(this.executed.forEach(i => console.log(i)));
+    // console.log('===');
 
-    this.waiting = [...this.waiting, ...this.executed];
-    // this.waiting = this.executed.concat(this.waiting);
+    // this.waiting = [...this.executed, ...this.waiting];
+    this.waiting = this.executed.concat(this.waiting);
     this.executed = [];
     return this;
   };

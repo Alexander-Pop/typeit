@@ -195,15 +195,23 @@ export default function Instance({
    * Reset the instance to new status.
    */
   this.reset = () => {
+
+    console.log('Destroyed?');
+    console.log(this.status.destroyed);
+    console.log('Timeouts:');
+    console.log(this.timeouts);
+    console.log('===');
+
     this.queue.reset();
 
-    console.log(this);
+    let newNode = this.$e.cloneNode(true);
+    this.$e.parentNode.insertBefore(newNode, this.$e.nextSibling);
 
     return new Instance({
       element: this.$e,
       id: id,
       options: this.opts,
-      queue: this.queue.waiting,
+      queue: this.queue.getWaiting(),
       isAReset: true
     });
   };
@@ -406,10 +414,6 @@ export default function Instance({
   this.opts.nextStringDelay = calculateDelay(this.opts.nextStringDelay);
   this.opts.loopDelay = calculateDelay(this.opts.loopDelay);
 
-  // console.log('===');
-  // console.log(queue.length);
-  // Should be '4' every time!
-  //
   // PROBLEM: The full set of previous queue items are NOT getting passed in!
   // It doesn't seem to be an issue with the handoff. There's never any items in the executed queue. Which is good.
   // It's almost like items are getting removed from the waiting queue, but not added to the executed.
@@ -417,6 +421,14 @@ export default function Instance({
   // Confirmed that a fresh rewrite from class to function does NOT solve the problem. Must be something else.
   // Confirmed that bringing the queue in-house does not fix it.
   // try this: getters and setters! no direct property access.
+  //
+  // For some reason, these queue items are coming out sometimes, but in the WRONG ORDER. Why?
+  // Fixed that, but now it seems to be the same timeout issue as before...
+
+  // How would an undefined item EVER get into the queue?
+
+  // console.log('previous queue:');
+  // queue.forEach(i => console.log(i));
 
   this.queue = new Queue(queue, [this.pause, this.opts.startDelay]);
 

@@ -165,6 +165,7 @@ export default function TypeIt(element, options) {
    */
   this.destroy = (removeCursor = true) => {
     this.instances = this.instances.map(instance => {
+
       // Destroy each timeout, for good housekeeping.
       instance.timeouts.forEach(timeout => {
         clearTimeout(timeout);
@@ -220,6 +221,11 @@ export default function TypeIt(element, options) {
    */
   this.go = () => {
     each(instance => {
+      console.log('waiting queue');
+      instance.queue.waiting.forEach(i => {
+        console.log(i);
+      });
+
       instance.init();
     });
 
