@@ -109,7 +109,7 @@ export default function Instance({
 
       this.queue.add(queueMany(itemizedString, this.type, true));
 
-      let queueLength = this.queue.waiting.length;
+      let queueLength = this.queue.getLength();
 
       //-- This is the last string. Get outta here.
       if (index + 1 === this.opts.strings.length) return;
@@ -197,6 +197,8 @@ export default function Instance({
   this.reset = () => {
     this.queue.reset();
 
+    console.log(this);
+
     return new Instance({
       element: this.$e,
       id: id,
@@ -232,7 +234,7 @@ export default function Instance({
   };
 
   this.fire = () => {
-    let queue = this.queue.waiting.slice();
+    let queue = this.queue.getCopy();
     let promiseChain = Promise.resolve();
 
     for (let i = 0; i < queue.length; i++) {
@@ -260,7 +262,7 @@ export default function Instance({
           // Fire this step! During this process, pluck items from the waiting
           // queue and move them to executed.
           key[0].call(this, key[1], key[2]).then(() => {
-            let justExecuted = this.queue.waiting.shift();
+            let justExecuted = this.queue.removeFirst();
 
             //-- If this is a phantom item, as soon as it's executed,
             //-- remove it from the queue and pretend it never existed.
@@ -275,7 +277,7 @@ export default function Instance({
             this.opts.afterStep(...callbackArgs);
 
             //-- Remove this item from the global queue. Needed for pausing.
-            this.queue.executed.push(justExecuted);
+            this.queue.addToExecuted(justExecuted);
 
             return resolve();
           });
@@ -412,6 +414,9 @@ export default function Instance({
   // It doesn't seem to be an issue with the handoff. There's never any items in the executed queue. Which is good.
   // It's almost like items are getting removed from the waiting queue, but not added to the executed.
   // They were removed from the waiting queue, but never added to executed.
+  // Confirmed that a fresh rewrite from class to function does NOT solve the problem. Must be something else.
+  // Confirmed that bringing the queue in-house does not fix it.
+  // try this: getters and setters! no direct property access.
 
   this.queue = new Queue(queue, [this.pause, this.opts.startDelay]);
 

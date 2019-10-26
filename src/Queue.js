@@ -1,4 +1,5 @@
 export default function(predefinedItems = [], initialItem = null) {
+
   /**
    * Insert items into the `waiting` queue.
    *
@@ -8,6 +9,22 @@ export default function(predefinedItems = [], initialItem = null) {
   this.insert = (start, newItems) => {
     this.waiting.splice(start, 0, newItems);
   };
+
+  this.getLength = () => {
+    return this.waiting.length;
+  }
+
+  this.getCopy = () => {
+    return this.waiting.slice();
+  }
+
+  this.removeFirst = () => {
+    return this.waiting.shift();
+  }
+
+  this.addToExecuted = (item) => {
+    this.executed.push(item);
+  }
 
   /**
    * Add a single or several steps onto the `waiting` queue.
