@@ -19,26 +19,81 @@ import calculatePace from "./helpers/calculatePace.js";
 import getParsedBody from "./helpers/getParsedBody.js";
 import createElement from "./helpers/createElement";
 
-export default function Instance({
-  typeIt,
-  element,
-  id,
-  options,
-  queue = [],
-  isAReset = false
-} = {}) {
+export default class Instance {
+
+  constructor({
+    typeIt,
+    element,
+    id,
+    options,
+    queue =[],
+    isAReset = false
+  } = {}) {
+    this.typeit = typeIt;
+    this.cursor = null;
+    this.elementIsInput = isInput(element);
+
+    this.status = {
+      started: false,
+      complete: false,
+      frozen: false,
+      destroyed: false
+    };
+    this.$e = element;
+    this.timeouts = [];
+    this.opts = Object.assign({}, defaults, options);
+    this.opts.strings = removeComments(toArray(this.opts.strings));
+    this.opts.html = this.elementIsInput ? false : this.opts.html;
+    this.opts.nextStringDelay = calculateDelay(this.opts.nextStringDelay);
+    this.opts.loopDelay = calculateDelay(this.opts.loopDelay);
+
+    // PROBLEM: The full set of previous queue items are NOT getting passed in!
+    // It doesn't seem to be an issue with the handoff. There's never any items in the executed queue. Which is good.
+    // It's almost like items are getting removed from the waiting queue, but not added to the executed.
+    // They were removed from the waiting queue, but never added to executed.
+    // Confirmed that a fresh rewrite from class to function does NOT solve the problem. Must be something else.
+    // Confirmed that bringing the queue in-house does not fix it.
+    // try this: getters and setters! no direct property access.
+    //
+    // For some reason, these queue items are coming out sometimes, but in the WRONG ORDER. Why?
+    // Fixed that, but now it seems to be the same timeout issue as before...
+
+    // How would an undefined item EVER get into the queue?
+
+    // console.log('previous queue:');
+    // queue.forEach(i => console.log(i));
+
+    this.queue = new Queue(queue, [this.pause, this.opts.startDelay]);
+
+    this.$e.setAttribute("data-typeit-id", id);
+
+    // Used to set a "placeholder" space in the element, so that it holds vertical sizing before anything's typed.
+    appendStyleBlock(
+      `[data-typeit-id]:before {content: '.'; display: inline-block; width: 0; visibility: hidden;}`
+    );
+
+    clearPreviousMarkup(element, this.elementIsInput);
+    this.handleHardCodedStrings();
+
+    // Only generate a queue if we have strings
+    // and this isn't a reset of a previous instance,
+    // in which case we'd have a pre-defined queue.
+    if (this.opts.strings.length && !isAReset) {
+      this.generateQueue();
+    }
+  }
   /**
    * Get a flattened array of text nodes that have been typed.
    * This excludes any cursor character that might exist.
    *
    * @return {array}
    */
-  const getAllChars = () => {
+  getAllChars() {
     let allNodes = nodeCollectionToArray(this.$e.childNodes).filter(
       node => !node.isEqualNode(cursor)
     );
     return convertNodesToChunks(allNodes, false);
-  };
+  }
 
   /**
    * Insert a split pause around a range of queue items.
@@ -47,14 +102,14 @@ export default function Instance({
    * @param  {Number} numberOfActionsToWrap The number of actions in the queue to wrap.
    * @return {void}
    */
-  const addSplitPause = (startPosition, numberOfActionsToWrap = 1) => {
-    // let delay = this.opts.nextStringDelay;
-    // this.queue.insert(startPosition, [this.pause, delay.before]);
-    // this.queue.insert(startPosition + numberOfActionsToWrap + 1, [
-    //   this.pause,
-    //   delay.after
-    // ]);
-  };
+  addSplitPause(startPosition, numberOfActionsToWrap = 1) {
+    let delay = this.opts.nextStringDelay;
+    this.queue.insert(startPosition, [this.pause, delay.before]);
+    this.queue.insert(startPosition + numberOfActionsToWrap + 1, [
+      this.pause,
+      delay.after
+    ]);
+  }
 
   /**
    * Provided it's a non-form element and the options is provided,
@@ -62,8 +117,8 @@ export default function Instance({
    *
    * @return {void}
    */
-  const setUpCursor = () => {
-    if (elementIsInput || !this.opts.cursor) {
+  setUpCursor() {
+    if (this.elementIsInput || !this.opts.cursor) {
       return;
     }
 
@@ -84,7 +139,7 @@ export default function Instance({
     );
 
     this.$e.appendChild(cursor);
-  };
+  }
 
   /**
    * Fire a callback after a delay, adding the created timeout
@@ -93,9 +148,9 @@ export default function Instance({
    * @param {object} callback
    * @param {integer} delay
    */
-  const wait = (callback, delay) => {
+  wait(callback, delay) {
     this.timeouts.push(setTimeout(callback, delay));
-  };
+  }
 
   /**
    * Based on provided strings, generate a TypeIt queue
@@ -103,7 +158,7 @@ export default function Instance({
    *
    * @param {array|null} initialStep
    */
-  const generateQueue = () => {
+  generateQueue() {
     this.opts.strings.forEach((string, index) => {
       let itemizedString = maybeChunkStringAsHtml(string, this.opts.html);
 
@@ -124,14 +179,14 @@ export default function Instance({
       addSplitPause(queueLength, string.length);
     });
 
-  };
+  }
 
   /**
    * 1. Reset queue.
    * 2. Remove initial pause.
    * 3. Add phantom deletions.
    */
-  const loopify = delay => {
+  loopify(delay) {
     //-- Reset queue.
     //-- Remove initial pause, so we can replace with `loop` pause.
     //-- Add delay pause FIRST, since we're adding to beginning of queue.
@@ -154,9 +209,9 @@ export default function Instance({
         true
       );
     }
-  };
+  }
 
-  const handleHardCodedStrings = () => {
+  handleHardCodedStrings() {
     let existingMarkup = this.$e.innerHTML;
 
     if (!existingMarkup) {
@@ -178,23 +233,23 @@ export default function Instance({
     }
 
     this.opts.strings = [existingMarkup.trim()].concat(this.opts.strings);
-  };
+  }
 
-  this.pause = (time = false) => {
+  pause(time = false) {
     return new Promise((resolve, reject) => {
-      wait(
+      this.wait(
         () => {
           return resolve();
         },
         time ? time : this.opts.nextStringDelay.total
       );
     });
-  };
+  }
 
   /**
    * Reset the instance to new status.
    */
-  this.reset = () => {
+  reset() {
 
     console.log('Destroyed?');
     console.log(this.status.destroyed);
@@ -204,26 +259,26 @@ export default function Instance({
 
     this.queue.reset();
 
-    let newNode = this.$e.cloneNode(true);
-    this.$e.parentNode.insertBefore(newNode, this.$e.nextSibling);
+    // let newNode = this.$e.cloneNode(true);
+    // this.$e.parentNode.insertBefore(newNode, this.$e.nextSibling);
 
     return new Instance({
       element: this.$e,
-      id: id,
+      id: this.id,
       options: this.opts,
       queue: this.queue.getWaiting(),
       isAReset: true
     });
-  };
+  }
 
   /**
    * Kick off the typing animation.
    */
-  this.init = () => {
+  init() {
 
     if (this.status.started) return;
 
-    setUpCursor();
+    this.setUpCursor();
 
     if (!this.opts.waitUntilVisible || isVisible(this.$e)) {
       this.status.started = true;
@@ -239,15 +294,15 @@ export default function Instance({
     };
 
     window.addEventListener("scroll", checkForStart);
-  };
+  }
 
-  this.fire = () => {
+  fire () {
     let queue = this.queue.getCopy();
     let promiseChain = Promise.resolve();
 
     for (let i = 0; i < queue.length; i++) {
       let key = queue[i];
-      let callbackArgs = [key, this.queue, typeIt];
+      let callbackArgs = [key, this.queue, this.typeIt];
 
       promiseChain = promiseChain.then(() => {
         return new Promise((resolve, reject) => {
@@ -301,20 +356,20 @@ export default function Instance({
             ? this.opts.loopDelay
             : this.opts.nextStringDelay;
 
-          wait(() => {
+          this.wait(() => {
             loopify(delay);
             this.fire();
           }, delay.after);
         }
 
         this.status.completed = true;
-        this.opts.afterComplete(typeIt);
+        this.opts.afterComplete(this.typeIt);
         return;
       })
       .catch(() => {});
-  };
+  }
 
-  this.type = character => {
+  type(character) {
     // This is a shell character object, needed for creating
     // the shell of an HTML this.$e. Just print & go.
     if (typeof character === "object" && !character.content) {
@@ -323,7 +378,7 @@ export default function Instance({
     }
 
     return new Promise(resolve => {
-      wait(() => {
+      this.wait(() => {
         insertIntoElement(this.$e, character);
         return resolve();
       }, this.pace[0]);
@@ -336,9 +391,9 @@ export default function Instance({
    *
    * @return {object}
    */
-  this.empty = () => {
+  empty() {
     return new Promise(resolve => {
-      if (elementIsInput) {
+      if (this.elementIsInput) {
         this.$e.value = "";
       } else {
         nodeCollectionToArray(this.$e.childNodes).forEach(n => {
@@ -349,7 +404,7 @@ export default function Instance({
       }
       return resolve();
     });
-  };
+  }
 
   /**
    * Remove the last child node from the target this.$e.
@@ -357,9 +412,9 @@ export default function Instance({
    * @param {boolean}
    * @param {object}
    */
-  this.delete = (keepGoingUntilAllIsGone = false) => {
+  delete(keepGoingUntilAllIsGone = false) {
     return new Promise(resolve => {
-      wait(() => {
+      this.wait(() => {
         let allChars = getAllChars();
 
         if (allChars.length) {
@@ -382,7 +437,7 @@ export default function Instance({
         return resolve();
       }, this.pace[1]);
     });
-  };
+  }
 
   /**
    * Update this instance's options.
@@ -390,62 +445,10 @@ export default function Instance({
    * @param {object}
    * @param {object}
    */
-  this.setOptions = options => {
+  setOptions (options) {
     return new Promise(resolve => {
       this.opts = Object.assign({}, this.opts, options);
       return resolve();
     });
-  };
-
-  let cursor = null;
-  let elementIsInput = isInput(element);
-
-  this.status = {
-    started: false,
-    complete: false,
-    frozen: false,
-    destroyed: false
-  };
-  this.$e = element;
-  this.timeouts = [];
-  this.opts = Object.assign({}, defaults, options);
-  this.opts.strings = removeComments(toArray(this.opts.strings));
-  this.opts.html = elementIsInput ? false : this.opts.html;
-  this.opts.nextStringDelay = calculateDelay(this.opts.nextStringDelay);
-  this.opts.loopDelay = calculateDelay(this.opts.loopDelay);
-
-  // PROBLEM: The full set of previous queue items are NOT getting passed in!
-  // It doesn't seem to be an issue with the handoff. There's never any items in the executed queue. Which is good.
-  // It's almost like items are getting removed from the waiting queue, but not added to the executed.
-  // They were removed from the waiting queue, but never added to executed.
-  // Confirmed that a fresh rewrite from class to function does NOT solve the problem. Must be something else.
-  // Confirmed that bringing the queue in-house does not fix it.
-  // try this: getters and setters! no direct property access.
-  //
-  // For some reason, these queue items are coming out sometimes, but in the WRONG ORDER. Why?
-  // Fixed that, but now it seems to be the same timeout issue as before...
-
-  // How would an undefined item EVER get into the queue?
-
-  // console.log('previous queue:');
-  // queue.forEach(i => console.log(i));
-
-  this.queue = new Queue(queue, [this.pause, this.opts.startDelay]);
-
-  this.$e.setAttribute("data-typeit-id", id);
-
-  // Used to set a "placeholder" space in the element, so that it holds vertical sizing before anything's typed.
-  appendStyleBlock(
-    `[data-typeit-id]:before {content: '.'; display: inline-block; width: 0; visibility: hidden;}`
-  );
-
-  clearPreviousMarkup(element, elementIsInput);
-  handleHardCodedStrings();
-
-  // Only generate a queue if we have strings
-  // and this isn't a reset of a previous instance,
-  // in which case we'd have a pre-defined queue.
-  if (this.opts.strings.length && !isAReset) {
-    generateQueue();
   }
 }
