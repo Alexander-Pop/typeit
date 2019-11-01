@@ -37,6 +37,7 @@ export default function Instance({
     let allNodes = nodeCollectionToArray(this.$e.childNodes).filter(
       node => !node.isEqualNode(cursor)
     );
+
     return convertNodesToChunks(allNodes, false);
   };
 
@@ -168,7 +169,7 @@ export default function Instance({
 
     if (this.opts.startDelete) {
       chunkStringAsHtml(existingMarkup).forEach(item => {
-        insertIntoElement(this.$e, item);
+        insertIntoElement(this.$e, item, this.cPosition);
       });
 
       this.queue.add([this.delete, true]);
@@ -312,13 +313,13 @@ export default function Instance({
     // This is a shell character object, needed for creating
     // the shell of an HTML this.$e. Just print & go.
     if (typeof character === "object" && !character.content) {
-      insertIntoElement(this.$e, character);
+      insertIntoElement(this.$e, character, this.cPosition);
       return Promise.resolve();
     }
 
     return new Promise(resolve => {
       this.wait(() => {
-        insertIntoElement(this.$e, character);
+        insertIntoElement(this.$e, character, this.cPosition);
         return resolve();
       }, this.pace[0]);
     });
@@ -391,6 +392,27 @@ export default function Instance({
     });
   };
 
+  /**
+  * Move type cursor by a given number.
+  *
+  * @param {integer} number
+  */
+  this.moveCursor = function(number) {
+    this.cPosition = this.cPosition + number;
+
+    let cursorNode = nodeCollectionToArray(this.$e.childNodes).filter(n => {
+      return n.classList && n.classList.contains("ti-cursor");
+    });
+
+    let newCursorNode = cursorNode[0].cloneNode(true);
+
+    removeNode(cursorNode[0]);
+
+    insertIntoElement(this.$e, newCursorNode, this.cPosition);
+
+    return Promise.resolve();
+  }
+
   let cursor = null;
   let elementIsInput = isInput(element);
 
@@ -402,6 +424,7 @@ export default function Instance({
   };
   this.$e = element;
   this.timeouts = [];
+  this.cPosition = 0;
   this.opts = Object.assign({}, defaults, options);
   this.opts.html = elementIsInput ? false : this.opts.html;
   this.opts.nextStringDelay = calculateDelay(this.opts.nextStringDelay);

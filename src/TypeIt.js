@@ -159,6 +159,17 @@ export default function TypeIt(element, options) {
   };
 
   /**
+   * Move type cursor by a given number.
+   *
+   * @param {integer} number
+   * @return {object}
+   */
+  this.move = function(number) {
+    queueUp('moveCursor', number);
+    return this;
+  }
+
+  /**
    * Destroy the instance, mark as such, and clean up. If specified,
    * remove the cursor on destruction.
    *

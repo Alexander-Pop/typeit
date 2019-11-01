@@ -9,7 +9,7 @@ import isInput from "./isInput";
  * @param {object} element
  * @param {string | object} content
  */
-export default (element, contentArg) => {
+export default (element, contentArg, cursorPosition) => {
   // Assume it's a string, and maybe overwrite later.
   let content = contentArg;
 
@@ -68,10 +68,15 @@ export default (element, contentArg) => {
   content =
     typeof content === "object" ? content : document.createTextNode(content);
 
+  let allNodes = element.childNodes;
+  // By default, the cursor position should be zero.
+  let lastNode = allNodes[allNodes.length - 1 + cursorPosition];
+
   // If a cursor node exists, make sure we print BEFORE that, but only if the target
   // element is the top-level one. Otherwise, stick it to the end of the element.
   element.insertBefore(
     content,
-    cursorNode && element.hasAttribute("data-typeit-id") ? cursorNode : null
+    // cursorNode && element.hasAttribute("data-typeit-id") ? cursorNode : null
+    lastNode
   );
 };
