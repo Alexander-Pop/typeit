@@ -18,6 +18,7 @@ import calculateDelay from "./helpers/calculateDelay.js";
 import calculatePace from "./helpers/calculatePace.js";
 import getParsedBody from "./helpers/getParsedBody.js";
 import createElement from "./helpers/createElement";
+import getCursorNode from "./helpers/getCursorNode.js";
 
 export default function Instance({
   typeIt,
@@ -398,19 +399,18 @@ export default function Instance({
   * @param {integer} number
   */
   this.moveCursor = function(number) {
-    this.cPosition = this.cPosition + number;
+    return new Promise(resolve => {
+      this.wait(() => {
+        this.cPosition = this.cPosition + number;
 
-    let cursorNode = nodeCollectionToArray(this.$e.childNodes).filter(n => {
-      return n.classList && n.classList.contains("ti-cursor");
+        let cursorNode = getCursorNode(this.$e);
+
+        if (cursorNode) {
+          insertIntoElement(this.$e, cursorNode, this.cPosition);
+        }
+        return resolve();
+      }, this.pace[0]);
     });
-
-    let newCursorNode = cursorNode[0].cloneNode(true);
-
-    removeNode(cursorNode[0]);
-
-    insertIntoElement(this.$e, newCursorNode, this.cPosition);
-
-    return Promise.resolve();
   }
 
   let cursor = null;

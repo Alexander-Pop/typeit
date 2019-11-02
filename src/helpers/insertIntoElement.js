@@ -2,6 +2,7 @@ import isLastAtEveryLevel from "./isLastAtEveryLevel";
 import createNode from "./createNode";
 import nodeCollectionToArray from "./nodeCollectionToArray";
 import isInput from "./isInput";
+import getCursorNode from "./getCursorNode";
 
 /**
  * Inserts a set of content into the element. Intended for SINGLE characters.
@@ -18,12 +19,12 @@ export default (element, contentArg, cursorPosition) => {
     return;
   }
 
-  // Find any existing cursor in the element to make sure we type BEFORE it.
-  let cursorNode = nodeCollectionToArray(element.childNodes).filter(n => {
-    return n.classList && n.classList.contains("ti-cursor");
-  });
+  let cursorNode = getCursorNode(element);
 
-  cursorNode = cursorNode.length ? cursorNode[0] : null;
+  // cursorPosition = cursorNode ? cursorPosition + 1 : cursorPosition;
+  // cursorPosition = 1;
+
+  // console.log(cursorPosition);
 
   // We're inserting a character within an element!
   // Make sure this isn't an HTML node that's being inserted.
@@ -69,14 +70,19 @@ export default (element, contentArg, cursorPosition) => {
     typeof content === "object" ? content : document.createTextNode(content);
 
   let allNodes = element.childNodes;
+
   // By default, the cursor position should be zero.
   let lastNode = allNodes[allNodes.length - 1 + cursorPosition];
+
+  console.log(cursorPosition);
+  console.log(allNodes);
+  console.log(lastNode);
 
   // If a cursor node exists, make sure we print BEFORE that, but only if the target
   // element is the top-level one. Otherwise, stick it to the end of the element.
   element.insertBefore(
     content,
     // cursorNode && element.hasAttribute("data-typeit-id") ? cursorNode : null
-    lastNode
+    lastNode ? lastNode : null
   );
 };

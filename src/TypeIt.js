@@ -165,7 +165,12 @@ export default function TypeIt(element, options) {
    * @return {object}
    */
   this.move = function(number) {
-    queueUp('moveCursor', number);
+    let isNegative = number < 0;
+    number = Math.abs(number);
+    each(instance => {
+      instance.queue.add(queueMany(number, [instance.moveCursor, isNegative ? -1 : 1]));
+    });
+
     return this;
   }
 
