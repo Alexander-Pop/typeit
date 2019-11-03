@@ -1,6 +1,7 @@
 import isLastAtEveryLevel from "./isLastAtEveryLevel";
 import createNode from "./createNode";
 import nodeCollectionToArray from "./nodeCollectionToArray";
+import getAllChildrenExcept from './getAllChildrenExcept';
 import isInput from "./isInput";
 import getCursorNode from "./getCursorNode";
 
@@ -13,7 +14,6 @@ import getCursorNode from "./getCursorNode";
 export default (element, contentArg, cursorPosition) => {
   // Assume it's a string, and maybe overwrite later.
   let content = contentArg;
-
   if (isInput(element)) {
     element.value = `${element.value}${content}`;
     return;
@@ -69,14 +69,14 @@ export default (element, contentArg, cursorPosition) => {
   content =
     typeof content === "object" ? content : document.createTextNode(content);
 
-  let allNodes = element.childNodes;
+  let allNodes = getAllChildrenExcept(element, cursorNode);
 
   // By default, the cursor position should be zero.
   let lastNode = allNodes[allNodes.length - 1 + cursorPosition];
 
-  console.log(cursorPosition);
+  // console.log(cursorPosition);
   console.log(allNodes);
-  console.log(lastNode);
+  // console.log(lastNode);
 
   // If a cursor node exists, make sure we print BEFORE that, but only if the target
   // element is the top-level one. Otherwise, stick it to the end of the element.

@@ -19,6 +19,7 @@ import calculatePace from "./helpers/calculatePace.js";
 import getParsedBody from "./helpers/getParsedBody.js";
 import createElement from "./helpers/createElement";
 import getCursorNode from "./helpers/getCursorNode.js";
+import getAllChildrenExcept from "./helpers/getAllChildrenExcept.js";
 
 export default function Instance({
   typeIt,
@@ -35,9 +36,7 @@ export default function Instance({
    * @return {array}
    */
   const getAllChars = () => {
-    let allNodes = nodeCollectionToArray(this.$e.childNodes).filter(
-      node => !node.isEqualNode(cursor)
-    );
+    let allNodes = getAllChildrenExcept(this.$e, cursor);
 
     return convertNodesToChunks(allNodes, false);
   };
