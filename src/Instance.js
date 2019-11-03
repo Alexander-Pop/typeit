@@ -81,7 +81,7 @@ export default function Instance({
     cursor.className = "ti-cursor";
     cursor.setAttribute(
       "style",
-      "display:inline;position:relative;font:inherit;color:inherit;line-height:inherit;"
+      "display:inline;position:absolute;font:inherit;color:inherit;line-height:inherit;"
     );
 
     this.$e.appendChild(cursor);
@@ -213,6 +213,8 @@ export default function Instance({
   this.init = function() {
     if (this.status.started) return;
 
+    this.queue.waiting.forEach(i => console.log(i));
+
     setUpCursor();
 
     if (!this.opts.waitUntilVisible) {
@@ -320,6 +322,7 @@ export default function Instance({
     return new Promise(resolve => {
       this.wait(() => {
         insertIntoElement(this.$e, character, this.cPosition);
+        // this.cPosition = this.cPosition + character.length;
         return resolve();
       }, this.pace[0]);
     });
@@ -393,13 +396,16 @@ export default function Instance({
   };
 
   /**
-  * Move type cursor by a given number.
-  *
-  * @param {integer} number
-  */
+   * Move type cursor by a given number.
+   *
+   * @param {integer} number
+   */
   this.moveCursor = function(number) {
     return new Promise(resolve => {
       this.wait(() => {
+        // need to update the position when characters are typed!
+        // or removed!
+
         this.cPosition = this.cPosition + number;
 
         let cursorNode = getCursorNode(this.$e);
@@ -410,7 +416,7 @@ export default function Instance({
         return resolve();
       }, this.pace[0]);
     });
-  }
+  };
 
   let cursor = null;
   let elementIsInput = isInput(element);

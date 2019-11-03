@@ -1,4 +1,4 @@
-import nodeCollectionToArray from './nodeCollectionToArray';
+import nodeCollectionToArray from "./nodeCollectionToArray";
 
 /**
  * Returns the cursor node, if it exists. If not, null.
@@ -6,10 +6,10 @@ import nodeCollectionToArray from './nodeCollectionToArray';
  * @param {object} node
  * @return {object|null}
  */
-export default (element) => {
+export default element => {
   let nodes = nodeCollectionToArray(element.childNodes).filter(n => {
     return n.classList && n.classList.contains("ti-cursor");
   });
 
   return nodes.length ? nodes[0] : null;
-}
+};

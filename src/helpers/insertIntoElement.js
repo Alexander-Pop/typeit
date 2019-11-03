@@ -1,7 +1,7 @@
 import isLastAtEveryLevel from "./isLastAtEveryLevel";
 import createNode from "./createNode";
 import nodeCollectionToArray from "./nodeCollectionToArray";
-import getAllChildrenExcept from './getAllChildrenExcept';
+import getAllChildrenExcept from "./getAllChildrenExcept";
 import isInput from "./isInput";
 import getCursorNode from "./getCursorNode";
 
@@ -69,13 +69,14 @@ export default (element, contentArg, cursorPosition) => {
   content =
     typeof content === "object" ? content : document.createTextNode(content);
 
-  let allNodes = getAllChildrenExcept(element, cursorNode);
+  // let allNodes = getAllChildrenExcept(element, cursorNode);
+  let allNodes = element.childNodes;
 
   // By default, the cursor position should be zero.
   let lastNode = allNodes[allNodes.length - 1 + cursorPosition];
 
   // console.log(cursorPosition);
-  console.log(allNodes);
+  // console.log(allNodes);
   // console.log(lastNode);
 
   // If a cursor node exists, make sure we print BEFORE that, but only if the target
