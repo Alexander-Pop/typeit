@@ -65,7 +65,7 @@ export default (element, contentArg, cursorPosition) => {
     typeof content === "object" ? content : document.createTextNode(content);
 
   let allNodes = getAllChildrenExcept(element, cursorNode);
-  let lastNode = allNodes[this.cPosition];
+  let lastNode = allNodes[cursorPosition];
 
   // If a cursor node exists, make sure we print BEFORE that, but only if the target
   // element is the top-level one. Otherwise, stick it to the end of the element.
