@@ -21,11 +21,6 @@ export default (element, contentArg, cursorPosition) => {
 
   let cursorNode = getCursorNode(element);
 
-  // cursorPosition = cursorNode ? cursorPosition + 1 : cursorPosition;
-  // cursorPosition = 1;
-
-  // console.log(cursorPosition);
-
   // We're inserting a character within an element!
   // Make sure this isn't an HTML node that's being inserted.
   if (typeof contentArg === "object" && !(contentArg instanceof HTMLElement)) {
@@ -69,15 +64,8 @@ export default (element, contentArg, cursorPosition) => {
   content =
     typeof content === "object" ? content : document.createTextNode(content);
 
-  // let allNodes = getAllChildrenExcept(element, cursorNode);
-  let allNodes = element.childNodes;
-
-  // By default, the cursor position should be zero.
-  let lastNode = allNodes[allNodes.length - 1 + cursorPosition];
-
-  // console.log(cursorPosition);
-  // console.log(allNodes);
-  // console.log(lastNode);
+  let allNodes = getAllChildrenExcept(element, cursorNode);
+  let lastNode = allNodes[this.cPosition];
 
   // If a cursor node exists, make sure we print BEFORE that, but only if the target
   // element is the top-level one. Otherwise, stick it to the end of the element.

@@ -213,7 +213,7 @@ export default function Instance({
   this.init = function() {
     if (this.status.started) return;
 
-    this.queue.waiting.forEach(i => console.log(i));
+    // this.queue.waiting.forEach(i => console.log(i));
 
     setUpCursor();
 
@@ -322,7 +322,7 @@ export default function Instance({
     return new Promise(resolve => {
       this.wait(() => {
         insertIntoElement(this.$e, character, this.cPosition);
-        // this.cPosition = this.cPosition + character.length;
+        this.cPosition = this.cPosition + character.length;
         return resolve();
       }, this.pace[0]);
     });
@@ -365,6 +365,8 @@ export default function Instance({
         }
 
         removeEmptyElements(this.$e);
+
+        this.cPosition = this.cPosition - 1;
 
         /**
          * If it's specified, keep deleting until all characters are gone. This is
@@ -411,8 +413,27 @@ export default function Instance({
         let cursorNode = getCursorNode(this.$e);
 
         if (cursorNode) {
-          insertIntoElement(this.$e, cursorNode, this.cPosition);
+          // insertIntoElement(this.$e, cursorNode, this.cPosition);
+
+          let allChars = [...this.$e.childNodes];
+
+          // Find the current position of the cursor.
+          let indexOfCursor = allChars.findIndex(i => {
+            return i.isEqualNode(cursorNode);
+          });
+
+          // console.log(indexOfCursor);
+          number = number > 0 ? number + 1 : number;
+
+          // Determine where the cursor should be moved.
+          let nodeToInsertBefore = allChars[indexOfCursor + number];
+
+          element.insertBefore(
+            cursorNode,
+            nodeToInsertBefore
+          );
         }
+
         return resolve();
       }, this.pace[0]);
     });
